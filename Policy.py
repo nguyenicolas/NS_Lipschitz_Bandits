@@ -112,8 +112,6 @@ class MBDE :
 
 
 
-
-
             #copied_nodes = copy.deepcopy(self.B_MASTER)
             #self.tree.active_depths[self.m] = copied_nodes
 
