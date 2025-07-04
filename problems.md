@@ -1,0 +1,2 @@
+- quand on désactive un depth, ca remet la proba des active_depth_Set[m] à 0
+    - La j'ai cheaté car j'ai commenté la ligne, mais j'aimerai que active_depth_Set se set à B_master à la fin d'un replay
