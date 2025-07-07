@@ -14,7 +14,7 @@ class MBDE :
         self.l = 0 # current episode
 
         # Constants
-        self.c0 = 0.56 
+        self.c0 = 0.5
 
     def initialize_episode(self):
         self.l+=1
@@ -87,11 +87,13 @@ class MBDE :
         # la je fais dans le setting ou il n'y a que 1 seul replay à la fois
         
         if new_depths : # si on entre dans un replay
+            self.t_start_replay = copy.deepcopy(self.t)
             
             for d in new_depths:
                 print(f'We activate depth {d} at time {self.t}')
                 self.tree.activate_depth(d)
-            self.tree.activate_depth(self.m) # on active le depth le + profond
+
+            self.tree.activate_depth(self.m) # on restart aussi depth m
             self.tree.visualize(t=self.t)
                 # Do something
                 # ...
@@ -101,9 +103,10 @@ class MBDE :
             self.tree.visualize(t=self.t)
             for d in removed_depths:
                 print(f'We remove depth {d} at time {self.t}')
-            self.tree.de_activate_depth(d)
+                self.tree.de_activate_depth(d)
 
-            # now cB_t(m) = B_MASTER
+            # now cB_t(m) = B_MASTER (je galere a faire cette partie)
+
 
 
 
@@ -169,17 +172,18 @@ class MBDE :
 
     def update_B_Master(self):
         B_MASTER = []
-        intersection_nodes = set(self.tree.active_depths[self.m]) & set(self.B_MASTER)
-        for node in intersection_nodes :
+        intersection_nodes_index = set(self.tree.active_depths[self.m]) & set(self.B_MASTER)
+        for node in intersection_nodes_index :
             node_in_tree = self.tree.find_node(node.depth, node.index)
-            B_MASTER.append(Diadic.Node(node.depth, node.index).clone_from(node_in_tree)) # la c'est ptet overkill mais je galere a faire marcher ca
+            #B_MASTER.append(Diadic.Node(node.depth, node.index).clone_from(node_in_tree)) # la c'est ptet overkill mais je galere a faire marcher ca
+            B_MASTER.append(node_in_tree)
         self.B_MASTER = B_MASTER
-
 
         #self.target_nodes = {Diadic.Node(n.depth, n.index) for n in intersection_nodes}
         #for new_node, original_node in zip(self.target_nodes, intersection_nodes):
         #    new_node.clone_from(original_node)
         #self.B_MASTER = list(self.target_nodes)
+
     def eviction_test(self):
         flag = False
         def treshhold(s1, s2, d):
@@ -187,7 +191,15 @@ class MBDE :
         
         def eviction_criteria(B1, B2, d) :
             """ Check if cumulative diff between B_1 and B_2 triggers positive test  """
-            n = self.t - self.starting_block
+            if d == self.m :
+                s1 = self.starting_block
+            else :
+                s1 = self.t_start_replay
+            n = self.t - s1
+            
+            if n <= 1:
+                return False
+            
             diff = [B1.mean_estimates[i] - B2.mean_estimates[i] for i in range(n)]
             #for s1 in range(n-1):
             #    cumsum = 0
@@ -198,7 +210,6 @@ class MBDE :
             #            return True
 
             cumsum = 0
-            s1 = 1
             for s2 in range(s1+1, n):
                 cumsum+= diff[s2]
                 if cumsum > treshhold(s1, s2, d):
