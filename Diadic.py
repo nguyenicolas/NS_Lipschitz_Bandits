@@ -87,9 +87,6 @@ class Node:
         dfs(self)
         return result
 
-    
-
-    
     def sample(self):
         """ Sample one action (i.e. number) in node """
         left = (self.index-1) / (2**(self.depth-1))
@@ -298,7 +295,7 @@ class Tree:
             current_node.__dict__.update(node.__dict__)
 
     def visualize(self, t=None):
-            filename=f"dyadic_tree{t}"
+            filename=f"Trees/dyadic_tree{t}"
             
             dot = Digraph()
 
@@ -317,4 +314,4 @@ class Tree:
 
             add_nodes_edges(self.root)
             dot.render(filename, format="png", cleanup=True)
-            print(f"Tree image saved as {filename}.png")
+            #print(f"Tree image saved as {filename}.png")

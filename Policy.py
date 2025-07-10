@@ -14,7 +14,7 @@ class MBDE :
         self.l = 0 # current episode
 
         # Constants
-        self.c0 = 0.5
+        self.c0 = 0.2
 
     def initialize_episode(self):
         self.l+=1
@@ -65,6 +65,36 @@ class MBDE :
                     for t in range(s, end):
                         if not self.active_mask[t].any():  # only assign if no deeper depth active
                             self.active_mask[t, d_index] = 1
+        
+    def get_starting_depths(self, t):
+        """
+        Return the set of depths whose active intervals start exactly at round t.
+        """
+        starting_depths = set()
+        if 0 <= t < 8**self.m:
+            for d_index in range(self.m - 2):  # corresponds to depths 2 to m-1
+                if self.Replays[t, d_index] == 1:
+                    d = d_index + 2
+                    starting_depths.add(d)
+        return starting_depths
+
+            
+    def get_ending_depths(self, t):
+        """
+        Return the set of depths whose active intervals end exactly at round t.
+        """
+        ending_depths = set()
+        for d_index in range(self.m - 2):  # corresponds to depths 2 to m-1
+            d = d_index + 2
+            length = 8**d
+            s = t - length   # starting time of interval that ends at t
+
+            # Check that s is within bounds and was a replay start at that depth
+            if 0 <= s < 8**self.m and self.Replays[s, d_index] == 1:
+                ending_depths.add(d)
+
+        return ending_depths
+
 
 
 
@@ -79,39 +109,39 @@ class MBDE :
     def check_if_replay(self):
 
         # Check if new replay begins
-        old_set = set(self.tree.active_depths.keys())
-        new_set = self.active_depth_set()
-        new_depths = new_set - old_set
-        removed_depths = old_set - new_set
+        #old_set = set(self.tree.active_depths.keys())
+        #new_set = self.active_depth_set()
+        #new_depths = new_set - old_set
+        #removed_depths = old_set - new_set
 
         # la je fais dans le setting ou il n'y a que 1 seul replay à la fois
         
-        if new_depths : # si on entre dans un replay
-            self.t_start_replay = copy.deepcopy(self.t)
+        
+        #if new_depths : # si on entre dans un replay
+
+        # si on sort d'un replay
+        if self.get_ending_depths(self.t) : 
             
-            for d in new_depths:
-                print(f'We activate depth {d} at time {self.t}')
-                self.tree.activate_depth(d)
+            d_ending = next(iter(self.get_ending_depths(self.t))) # bon la on fait dans le cas ou un seul replay peut être activé à la fois
+            print(f'We remove depth {d_ending} at time {self.t}')
+            self.tree.de_activate_depth(d_ending)
+            self.tree.visualize(t=self.t)
+
+            # now cB_t(m) = B_MASTER (je galere a faire cette partie
+
+        # Si on entre dans un replay
+        if self.get_starting_depths(self.t) :
+
+            self.t_start_replay = copy.deepcopy(self.t)
+            d_starting = next(iter(self.get_starting_depths(self.t)))
+            print(f'We activate depth {d_starting} at time {self.t}')
+            self.tree.activate_depth(d_starting)
 
             self.tree.activate_depth(self.m) # on restart aussi depth m
             self.tree.visualize(t=self.t)
-                # Do something
-                # ...
-                # Je me rappelle plus si il faut reactiver toutes les bins ou juste celles à cette depth ?
-        
-        if removed_depths : # si on sort d'un replay
-            self.tree.visualize(t=self.t)
-            for d in removed_depths:
-                print(f'We remove depth {d} at time {self.t}')
-                self.tree.de_activate_depth(d)
-
-            # now cB_t(m) = B_MASTER (je galere a faire cette partie)
-
-
-
-
-
-
+            # Do something
+            # ...
+            # Je me rappelle plus si il faut reactiver toutes les bins ou juste celles à cette depth ?
 
 
 
@@ -135,10 +165,8 @@ class MBDE :
         self.check_if_replay()
 
         min_depth = min(self.tree.active_depths)
-        print('min depth = ', min_depth)
         candidates = self.tree.active_depths[min_depth]
         probs = [node.proba for node in candidates]
-        print(probs)
         current = random.choices(candidates, weights=probs, k=1)[0]
 
         for depth in sorted(self.tree.active_depths) :
@@ -161,7 +189,7 @@ class MBDE :
     def update(self, x_t, y_t):
         self.tree.update_estimates(x_t, y_t)
         #if self.t >= 2 :
-        print(f'active depths at {self.t} : ', self.active_depth_set())
+        #print(f'active depths at {self.t} : ', self.active_depth_set())
 
         self.eviction_test()
         self.tree.update_proba()
@@ -211,7 +239,6 @@ class MBDE :
 
             # 
 
-
             cumsum = 0
             for s2 in range(s1+1, n):
                 cumsum+= diff[s2]
@@ -246,6 +273,7 @@ class MBDE :
         if self.t == self.ending_block : # if block ends naturally
             print(self.t)
             self.initialize_block()
+
 
     def visualize_replays(self):
         """
