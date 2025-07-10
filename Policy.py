@@ -209,6 +209,9 @@ class MBDE :
             #            print('true')
             #            return True
 
+            # 
+
+
             cumsum = 0
             for s2 in range(s1+1, n):
                 cumsum+= diff[s2]
