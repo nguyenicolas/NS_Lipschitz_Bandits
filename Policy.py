@@ -15,6 +15,7 @@ class MBDE :
 
         # Constants
         self.c0 = 0.2
+        self.t_start_replay = self.t
 
     def initialize_episode(self):
         self.l+=1
@@ -128,6 +129,17 @@ class MBDE :
             self.tree.visualize(t=self.t)
 
             # now cB_t(m) = B_MASTER (je galere a faire cette partie
+            self.tree.active_depths[self.m] = []
+            for node in self.B_MASTER:
+                print('proba du node recopié :', node.proba)
+                
+                # Retrieve the actual node from the tree
+                original_node = self.tree.find_node(node.depth, node.index)
+                
+                if original_node is not None:
+                    self.tree.active_depths[self.m].append(original_node)
+                        
+            self.tree.visualize()
 
         # Si on entre dans un replay
         if self.get_starting_depths(self.t) :
@@ -139,6 +151,7 @@ class MBDE :
 
             self.tree.activate_depth(self.m) # on restart aussi depth m
             self.tree.visualize(t=self.t)
+        
             # Do something
             # ...
             # Je me rappelle plus si il faut reactiver toutes les bins ou juste celles à cette depth ?
@@ -193,7 +206,7 @@ class MBDE :
 
         self.eviction_test()
         self.tree.update_proba()
-        self.update_B_Master()
+        #self.update_B_Master()
 
         self.t+=1
         self.check()
@@ -212,6 +225,15 @@ class MBDE :
         #    new_node.clone_from(original_node)
         #self.B_MASTER = list(self.target_nodes)
 
+        #self.tree.active_depths[self.m] = []
+        #    for node in self.B_MASTER :
+        #        print( 'proba du node copié : ', node.proba)
+        #        cloned_node = copy.deepcopy(node)
+        #        self.tree.active_depths[self.m].append(cloned_node)
+
+
+
+
     def eviction_test(self):
         flag = False
         def treshhold(s1, s2, d):
@@ -219,10 +241,10 @@ class MBDE :
         
         def eviction_criteria(B1, B2, d) :
             """ Check if cumulative diff between B_1 and B_2 triggers positive test  """
-            if d == self.m :
-                s1 = self.starting_block
-            else :
-                s1 = self.t_start_replay
+            #if d == self.m :
+            #    s1 = self.starting_block
+            #else :
+            s1 = self.t_start_replay
             n = self.t - s1
             
             if n <= 1:
@@ -243,14 +265,13 @@ class MBDE :
             for s2 in range(s1+1, n):
                 cumsum+= diff[s2]
                 if cumsum > treshhold(s1, s2, d):
-                    print('true')
                     return True
 
                     
         for d, active_nodes_d in self.tree.active_depths.items() :
             for B, B_prim in permutations(active_nodes_d, 2):
                 if eviction_criteria(B, B_prim, d): 
-                    print(f'{B_prim.index} evicted')
+                    print(f'{(B_prim.depth, B_prim.index)} evicted at round {self.t}')
                     # then evict B
                     B_prim.evict()
                     flag = True
