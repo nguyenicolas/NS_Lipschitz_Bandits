@@ -27,6 +27,7 @@ class MBDE:
 
         self.ScheduleReplays()
         self.t_start_replay = self.t
+        # test
 
         self.tree = Diadic.Tree(self.m)
         self.tree.update_proba()
