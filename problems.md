@@ -1,3 +1,5 @@
-- quand on désactive un depth, ca remet la proba des active_depth_Set[m] à 0
-    - La j'ai cheaté car:
-        Quand on sort d'un replay into une période ou il n'y a pas de replay actif, cB_t(m) est égal au dernier cB_t(m) qui a été initialisé au début du dernier replay, et ce n'est pas forcement B_MASTER. Bon je pense sur ce toy exemple ca ne fait pas une grosse dif.
+- Eviciton test: a partir du bloc m=4, j'arrive plus à evict, meme si la constante c0 est toute petite. 
+- J'ai résolu le pb des replays qui s'intercalent
+- Maintenant le pb c'est que s1 etc sont mal definis si y'a des replays qui s'intercalent ?
+    - Peut etre qu'il faudrait creer un dicitonnaire de s1 et appeler le s1 correspondant à chaque depth
+        - Genre comme dans le pseudo-code.

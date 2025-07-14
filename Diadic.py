@@ -25,11 +25,6 @@ class Node:
         self.left = Node(self.depth + 1, 2 * self.index - 1, parent=self)
         self.right = Node(self.depth + 1, 2 * self.index, parent=self)
 
-    def clone_from(self,other):
-        new_node = Node(other.depth, other.index)
-        new_node.__dict__ = copy.deepcopy(other.__dict__)
-        return new_node
-    
     def evict(self):
         self.active = False
         if self.left :
@@ -168,7 +163,8 @@ class Tree:
                 de_activate_at_depth(node.right)
 
         de_activate_at_depth(self.root)
-        del self.active_depths[depth]
+        if depth in self.active_depths:
+            del self.active_depths[depth]
         self.update_proba() # en vrai jpense a chaque fois qu'on active un depth faut re-update les pb
         
     def get_all_nodes_at_depth(self, depth):
