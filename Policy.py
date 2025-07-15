@@ -4,20 +4,23 @@ import math
 import random
 from itertools import permutations
 import Diadic
+from collections import defaultdict
+
+MIN_DEPTH = 2
 
 class MBDE:
     def __init__(self, T: int) -> None:
         self.T = T
         self.t = 1
         self.l = 0  # Episode counter
-        self.c0 = 0.3
-        self.t_start_replay = self.t
+        self.c0 = 0.2
 
     def initialize_episode(self):
         self.l += 1
         print(f'Entering Episode {self.l}')
         self.block = 0
-        self.m = 2  # Minimal depth
+        self.m = MIN_DEPTH  # Minimal depth
+        self.StoreActive = {} # Dico that stores starting/ending replays at each depth
 
     def initialize_block(self):
         self.m += 1
@@ -25,9 +28,11 @@ class MBDE:
         self.starting_block = self.t
         self.ending_block = self.t + 8 ** self.m
 
+        self.StoreActive = defaultdict(dict, {self.m: {'starting': self.starting_block, 'ending': self.ending_block}})
+
         self.ScheduleReplays()
-        self.t_start_replay = self.t
-        # test
+        #self.t_start_replay = self.t
+        
 
         self.tree = Diadic.Tree(self.m)
         self.tree.update_proba()
@@ -39,22 +44,21 @@ class MBDE:
         Preference is given to the deepest depth where a replay is triggered.
         """
         block_size = 8 ** self.m
-        self.Replays = np.zeros((block_size, self.m - 2))  # depths 2 to m-1
+        self.Replays = np.zeros((block_size, self.m - MIN_DEPTH))  # depths 2 to m-1
+
+        powers = [(d, 8 ** d) for d in range(2, self.m)]  # Precompute powers of 8
 
         for s in range(2, block_size):
-            selected_d_index = None
-            for d in reversed(range(2, self.m)):  # reverse: prioritize deeper depths
-                if s % 8 ** d == 0:
-                    p = np.sqrt(8 ** d / (s + 1))
+            for d, power in reversed(powers):  # Prioritize deeper depths
+                if s % power == 0:
+                    p = np.sqrt(power / (s + 1))
                     if np.random.rand() < p:
-                        selected_d_index = d - 2  # adjust for zero-indexed column
-                        break  # only one replay allowed per time s
-
-            if selected_d_index is not None:
-                self.Replays[s, selected_d_index] = 1
+                        self.Replays[s, d - 2] = 1
+                        break
 
         self.get_mask()
         self.visualize_replays()
+
 
 
     def get_mask(self):
@@ -62,8 +66,8 @@ class MBDE:
         self.active_mask = np.zeros_like(self.Replays)
 
         for t in range(2, block_size):
-            for d_index in range(self.m - 2):
-                d = d_index + 2
+            for d_index in range(self.m - MIN_DEPTH):
+                d = d_index + MIN_DEPTH
                 length = 8 ** d
                 s = t - (t % length)
                 if s < block_size and self.Replays[s, d_index] == 1 and s <= t < s + length:
@@ -73,15 +77,15 @@ class MBDE:
 
     def get_starting_depths(self, t: int) -> set:
         return {
-            d_index + 2
-            for d_index in range(self.m - 2)
+            d_index + MIN_DEPTH
+            for d_index in range(self.m - MIN_DEPTH)
             if 0 <= t < 8 ** self.m and self.Replays[t, d_index] == 1
         }
 
     def get_ending_depths(self, t: int) -> set:
         result = set()
         for d_index in range(self.m - 2):
-            d = d_index + 2
+            d = d_index + MIN_DEPTH
             s = t - 8 ** d
             if 0 <= s < 8 ** self.m and self.Replays[s, d_index] == 1:
                 result.add(d)
@@ -95,30 +99,39 @@ class MBDE:
         )
 
     def check_if_replay(self):
-        starting_depths = self.get_starting_depths(self.t)
-        ending_depths = self.get_ending_depths(self.t)
 
-        if ending_depths:
-            d_ending = next(iter(ending_depths))
-            print(f'Depth {d_ending} deactivated at t={self.t}')
-            self.tree.de_activate_depth(d_ending)
-            self.tree.visualize(t=self.t)
-
-            if len(self.tree.active_depths) == 1: # donc si le seul active depth est m
-                print('solo run at ', self.t)
-                # alors cB_m(t) c'est exactement B_MASTER
+        def restore_B_MASTER_if_needed():
+            if len(self.tree.active_depths) == 1:
                 self.tree.active_depths[self.m] = [
                     self.tree.find_node(node.depth, node.index)
                     for node in self.B_MASTER
                     if self.tree.find_node(node.depth, node.index) is not None
                 ]
+                
+        starting_depths = self.get_starting_depths(self.t)
+        ending_depths = self.get_ending_depths(self.t)
+
+        if ending_depths:
+            d_ending = next(iter(ending_depths))
+            #print(f'Depth {d_ending} deactivated at t={self.t}')
+            self.tree.de_activate_depth(d_ending)
+            self.tree.visualize(t=self.t)
+
+            restore_B_MASTER_if_needed()
 
         if starting_depths:
-            self.t_start_replay = self.t
-            d_starting = next(iter(starting_depths))
-            print(f'Depth {d_starting} activated at t={self.t}')
+            #self.t_start_replay = self.t
+
+            d_starting = next(iter(starting_depths)) # the depth that starts
+            #print(f'Depth {d_starting} activated at t={self.t}')
             self.tree.activate_depth(d_starting)
             self.tree.activate_depth(self.m)
+
+            self.StoreActive[d_starting] = {
+            'starting': self.t, 
+            'ending': self.t + 8**d_starting
+            }
+
             self.tree.visualize(t=self.t)
 
     def choose_action(self):
@@ -157,7 +170,6 @@ class MBDE:
         intersection_nodes_index = set(self.tree.active_depths[self.m]) & set(self.B_MASTER)
         for node in intersection_nodes_index :
             node_in_tree = self.tree.find_node(node.depth, node.index)
-            #B_MASTER.append(Diadic.Node(node.depth, node.index).clone_from(node_in_tree)) # la c'est ptet overkill mais je galere a faire marcher ca
             B_MASTER.append(node_in_tree)
         self.B_MASTER = B_MASTER
 
@@ -166,7 +178,7 @@ class MBDE:
             return self.c0 * math.log(self.T) * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
 
         def eviction_criteria(B1, B2, d):
-            n = self.t - self.t_start_replay
+            n = self.t - self.StoreActive[d]['starting']
             if n <= 1:
                 return False
             diff = [B1.mean_estimates[i] - B2.mean_estimates[i] for i in range(n)]
@@ -181,7 +193,7 @@ class MBDE:
         for d, nodes in self.tree.active_depths.items():
             for B, Bp in permutations(nodes, 2):
                 if eviction_criteria(B, Bp, d):
-                    print(f'Node ({Bp.depth}, {Bp.index}) evicted at t={self.t}')
+                    print(f'Node ({Bp.depth}, {Bp.index}) evicted at t={self.t} (Replay({min(self.tree.active_depths)}))')
                     Bp.evict()
                     flag = True
 
@@ -191,7 +203,7 @@ class MBDE:
 
     def check(self):
         if not self.B_MASTER:
-            print(f'Shift at {self.t}')
+            print(f'SHIFT DETECTED : {self.t}')
             self.initialize_episode()
             self.initialize_block()
             
@@ -204,7 +216,7 @@ class MBDE:
             self.initialize_block()
 
     def visualize_replays(self):
-        m = self.active_mask.shape[1] + 2
+        m = self.active_mask.shape[1] + MIN_DEPTH
         T = self.active_mask.shape[0]
         plt.figure(figsize=(12, (m - 2) * 0.6))
 

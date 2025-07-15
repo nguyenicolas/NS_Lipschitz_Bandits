@@ -1,5 +1,3 @@
-- Eviciton test: a partir du bloc m=4, j'arrive plus à evict, meme si la constante c0 est toute petite. 
-- J'ai résolu le pb des replays qui s'intercalent
-- Maintenant le pb c'est que s1 etc sont mal definis si y'a des replays qui s'intercalent ?
-    - Peut etre qu'il faudrait creer un dicitonnaire de s1 et appeler le s1 correspondant à chaque depth
-        - Genre comme dans le pseudo-code.
+- il faudrait considerer tous les intervalles [s1, s2]: c'est couteux !
+    - pour l'instant je fixe s1 et je considere que les intervalles de la forme [s1, t]. C'est pour ca que je peux pas detecter certains replays.
+        - il faudrait considerer des intervalles du type [s1, 2**i].
