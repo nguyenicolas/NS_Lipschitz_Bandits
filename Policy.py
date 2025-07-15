@@ -13,7 +13,7 @@ class MBDE:
         self.T = T
         self.t = 1
         self.l = 0  # Episode counter
-        self.c0 = 0.2
+        self.c0 = 0.3#0.3
 
     def initialize_episode(self):
         self.l += 1
@@ -58,8 +58,6 @@ class MBDE:
 
         self.get_mask()
         self.visualize_replays()
-
-
 
     def get_mask(self):
         block_size = 8 ** self.m
@@ -115,7 +113,7 @@ class MBDE:
             d_ending = next(iter(ending_depths))
             #print(f'Depth {d_ending} deactivated at t={self.t}')
             self.tree.de_activate_depth(d_ending)
-            self.tree.visualize(t=self.t)
+            #self.tree.visualize(t=self.t)
 
             restore_B_MASTER_if_needed()
 
@@ -132,7 +130,7 @@ class MBDE:
             'ending': self.t + 8**d_starting
             }
 
-            self.tree.visualize(t=self.t)
+            #self.tree.visualize(t=self.t)
 
     def choose_action(self):
         self.check_if_replay()
@@ -178,15 +176,39 @@ class MBDE:
             return self.c0 * math.log(self.T) * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
 
         def eviction_criteria(B1, B2, d):
+            #n = self.t - self.StoreActive[d]['starting']
+            #if n <= 1:
+            #    return False
+            #diff = [B1.mean_estimates[i] - B2.mean_estimates[i] for i in range(n)]
+            #cumsum = 0
+
+            # le malade mental !!!!!!!!
+            #for s2 in range(1, n):
+            #    cumsum += diff[s2]
+            #    if cumsum > threshold(0, s2, d):
+            #        return True
+            #return False
+        
             n = self.t - self.StoreActive[d]['starting']
-            if n <= 1:
+            if n <= 2:
                 return False
-            diff = [B1.mean_estimates[i] - B2.mean_estimates[i] for i in range(n)]
-            cumsum = 0
-            for s2 in range(1, n):
-                cumsum += diff[s2]
-                if cumsum > threshold(0, s2, d):
+
+            s_start = self.StoreActive[d]['starting'] - self.starting_block
+            diff = [B1.mean_estimates[i] - B2.mean_estimates[i] for i in range(s_start, self.t - self.starting_block)]
+
+            # Compute prefix sums
+            prefix_sum = [0] * (n + 1)
+            for i in range(n):
+                prefix_sum[i + 1] = prefix_sum[i] + diff[i]
+
+            # Check all [s1, t) intervals
+            for s1_offset in range(n - 1):  # same as s1 in s_start to t-2
+                s1 =  self.starting_block + s_start + s1_offset
+                cum_diff = prefix_sum[n] - prefix_sum[s1_offset]
+                if cum_diff > threshold(s1, self.t, d):
+                    print(f'evicted with interval [{s1}, {self.t}]')
                     return True
+
             return False
 
         flag = False

@@ -14,7 +14,7 @@ class Environment :
             #    return 1 - distance / width
             #else:
             #    return 0.0
-            if t <= 1600 :
+            if t <= 1500 :
                 return x
             return 1 - x
         return naive_function

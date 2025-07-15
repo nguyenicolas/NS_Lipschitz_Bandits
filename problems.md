@@ -1,3 +1,2 @@
-- il faudrait considerer tous les intervalles [s1, s2]: c'est couteux !
-    - pour l'instant je fixe s1 et je considere que les intervalles de la forme [s1, t]. C'est pour ca que je peux pas detecter certains replays.
-        - il faudrait considerer des intervalles du type [s1, 2**i].
+- ok ca detecte des shifts !! solide
+- Objectif de mercredi: plotter des bornes de regret
