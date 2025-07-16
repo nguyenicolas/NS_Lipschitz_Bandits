@@ -13,7 +13,8 @@ class MBDE:
         self.T = T
         self.t = 1
         self.l = 0  # Episode counter
-        self.c0 = 0.3#0.3
+        self.c0 = 0.41 # DICLAIMER: i cheat on the testing constant
+        self.regrets = []
 
     def initialize_episode(self):
         self.l += 1
@@ -236,7 +237,7 @@ class MBDE:
                     self.tree.de_activate_depth(d)
 
             self.initialize_block()
-
+    
     def visualize_replays(self):
         m = self.active_mask.shape[1] + MIN_DEPTH
         T = self.active_mask.shape[0]
