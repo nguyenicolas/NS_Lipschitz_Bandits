@@ -13,7 +13,7 @@ class MBDE:
         self.T = T
         self.t = 1
         self.l = 0  # Episode counter
-        self.c0 = 0.41 # DICLAIMER: i cheat on the testing constant
+        self.c0 = 0.42 # DICLAIMER: i cheat on the testing constant
         self.regrets = []
 
     def initialize_episode(self):
@@ -174,21 +174,9 @@ class MBDE:
 
     def eviction_test(self):
         def threshold(s1, s2, d):
-            return self.c0 * math.log(self.T) * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
+            return self.c0 * math.log(8**self.m) * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
 
         def eviction_criteria(B1, B2, d):
-            #n = self.t - self.StoreActive[d]['starting']
-            #if n <= 1:
-            #    return False
-            #diff = [B1.mean_estimates[i] - B2.mean_estimates[i] for i in range(n)]
-            #cumsum = 0
-
-            # le malade mental !!!!!!!!
-            #for s2 in range(1, n):
-            #    cumsum += diff[s2]
-            #    if cumsum > threshold(0, s2, d):
-            #        return True
-            #return False
         
             n = self.t - self.StoreActive[d]['starting']
             if n <= 2:
@@ -269,3 +257,78 @@ class MBDE:
 
         plt.tight_layout()
         plt.show()
+
+
+"""
+class UCB:
+    def __init__(self, K, c=1.0):
+        self.K = K
+        self.counts = np.zeros(K)
+        self.values = np.zeros(K)
+        self.total_pulls = 0
+        self.c = c
+
+    def choose_action(self):
+        if self.total_pulls < self.K:
+            action = self.total_pulls
+        else:
+            ucb_values = self.values + self.c * np.sqrt(np.log(self.total_pulls) / self.counts)
+            action = int(np.argmax(ucb_values))
+        self.total_pulls += 1
+        return action
+
+    def update(self, k_t, y_t):
+        self.counts[k_t] += 1
+        n = self.counts[k_t]
+        self.values[k_t] += (y_t - self.values[k_t]) / n
+
+class Binning(UCB):
+    def __init__(self, T, c=1.0):
+        K = int(np.power(T / np.log(T), 1/3))
+        super().__init__(K, c)
+
+    def choose_action(self):
+            k_t = UCB.choose_action()
+    
+    def update(self, k_t, y_t):
+        return super().update(k_t, y_t)
+"""
+
+
+class BinningUCB:
+
+    def __init__(self, T, c=1.0):
+        self.K = int(np.power(T / np.log(T), 1/3))  # Optimal bin count for 1-Lipschitz
+        print('K optimal = ', self.K)
+        self.bins = np.linspace(0, 1, self.K + 1)
+        self.counts = np.zeros(self.K)
+        self.values = np.zeros(self.K)
+        self.total_pulls = 0
+        self.c = c
+        self.regrets = []
+
+    def get_bin_index(self, x):
+        """Returns bin index corresponding to input x in [0,1]."""
+        return min(self.K - 1, int(x * self.K))  # x in [0,1), last bin is right-closed
+
+    def choose_action(self):
+        """
+        Select a point x_t in [0,1] to play.
+        Returns the center of the chosen bin.
+        """
+        if self.total_pulls < self.K: # choose each bin at least one
+            self.bin_index = self.total_pulls
+        else:
+            ucb_values = self.values + self.c * np.sqrt(np.log(self.total_pulls) / (self.counts + 1e-9))
+            self.bin_index = int(np.argmax(ucb_values))
+
+        self.total_pulls += 1
+        # Return center of the bin
+        x_t = (self.bins[self.bin_index] + self.bins[self.bin_index + 1]) / 2
+        return x_t
+
+    def update(self, x_t, y_t):
+        """Update the mean estimate of a specific bin after receiving reward y_t."""
+        self.counts[self.bin_index] += 1
+        n = self.counts[self.bin_index]
+        self.values[self.bin_index] += (y_t - self.values[self.bin_index]) / n
