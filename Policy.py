@@ -16,6 +16,10 @@ class MBDE:
         self.c0 = 0.42 # DICLAIMER: i cheat on the testing constant
         self.regrets = []
 
+        self.initialize_episode()
+        self.initialize_block()
+        self.tree.update_proba()
+
     def initialize_episode(self):
         self.l += 1
         print(f'Entering Episode {self.l}')
@@ -259,42 +263,6 @@ class MBDE:
         plt.show()
 
 
-"""
-class UCB:
-    def __init__(self, K, c=1.0):
-        self.K = K
-        self.counts = np.zeros(K)
-        self.values = np.zeros(K)
-        self.total_pulls = 0
-        self.c = c
-
-    def choose_action(self):
-        if self.total_pulls < self.K:
-            action = self.total_pulls
-        else:
-            ucb_values = self.values + self.c * np.sqrt(np.log(self.total_pulls) / self.counts)
-            action = int(np.argmax(ucb_values))
-        self.total_pulls += 1
-        return action
-
-    def update(self, k_t, y_t):
-        self.counts[k_t] += 1
-        n = self.counts[k_t]
-        self.values[k_t] += (y_t - self.values[k_t]) / n
-
-class Binning(UCB):
-    def __init__(self, T, c=1.0):
-        K = int(np.power(T / np.log(T), 1/3))
-        super().__init__(K, c)
-
-    def choose_action(self):
-            k_t = UCB.choose_action()
-    
-    def update(self, k_t, y_t):
-        return super().update(k_t, y_t)
-"""
-
-
 class BinningUCB:
 
     def __init__(self, T, c=1.0):
@@ -306,6 +274,7 @@ class BinningUCB:
         self.total_pulls = 0
         self.c = c
         self.regrets = []
+
 
     def get_bin_index(self, x):
         """Returns bin index corresponding to input x in [0,1]."""
@@ -332,3 +301,76 @@ class BinningUCB:
         self.counts[self.bin_index] += 1
         n = self.counts[self.bin_index]
         self.values[self.bin_index] += (y_t - self.values[self.bin_index]) / n
+
+
+class BinningUCB_Oracle:
+    def __init__(self, T, nb_shifts, c=1.0):
+        """
+        T: total time horizon
+        change_points: list of change points (rounds where new stationary phases start)
+        c: exploration parameter for UCB
+        """
+        self.T = T
+        self.phase_idx = 0
+        self.phase_start = 0
+
+        self.nb_shifts = nb_shifts 
+        self.get_change_points()
+
+        print('change points = ', self.change_points)
+
+        self.phase_end = self.change_points[0]
+
+        self.c = c
+        self.total_pulls = 0
+        self._init_phase()
+        self.regrets = []
+
+    def get_change_points(self):
+        if self.nb_shifts < 2:
+            return []
+
+        phase_length = self.T // self.nb_shifts
+        self.change_points = [phase_length * i for i in range(1, self.nb_shifts)] + [self.T]
+
+    def _init_phase(self):
+        """Initialize a new stationary phase."""
+        phase_length = self.phase_end - self.phase_start
+        self.K = int(np.power(phase_length / np.log(max(phase_length, 2)), 1/3))
+        self.bins = np.linspace(0, 1, self.K + 1)
+        self.counts = np.zeros(self.K)
+        self.values = np.zeros(self.K)
+        self.phase_pulls = 0
+        print(f"[Phase {self.phase_idx}] Init with K = {self.K}")
+
+    def get_bin_index(self, x):
+        return min(self.K - 1, int(x * self.K))
+
+    def choose_action(self):
+        """Choose an action using UCB within current phase."""
+        # Handle phase change if needed
+        if self.total_pulls >= self.phase_end:
+            print('change phase at ', self.total_pulls)
+            self.phase_idx += 1
+            self.phase_start = self.phase_end
+            self.phase_end = self.change_points[self.phase_idx]
+            self._init_phase()
+
+        if self.phase_pulls < self.K:
+            self.bin_index = self.phase_pulls
+        else:
+            bonuses = self.c * np.sqrt(np.log(max(self.phase_pulls, 1)) / (self.counts + 1e-9))
+            self.bin_index = int(np.argmax(self.values + bonuses))
+
+        self.total_pulls += 1
+        self.phase_pulls += 1
+        return (self.bins[self.bin_index] + self.bins[self.bin_index + 1]) / 2
+
+    def update(self, x_t, y_t):
+        """Update estimates for current bin."""
+        self.counts[self.bin_index] += 1
+        n = self.counts[self.bin_index]
+        self.values[self.bin_index] += (y_t - self.values[self.bin_index]) / n
+
+    
+
