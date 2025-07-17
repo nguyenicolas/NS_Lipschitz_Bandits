@@ -9,11 +9,11 @@ from collections import defaultdict
 MIN_DEPTH = 2
 
 class MBDE:
-    def __init__(self, T: int) -> None:
+    def __init__(self, T, c0) -> None:
         self.T = T
         self.t = 1
         self.l = 0  # Episode counter
-        self.c0 = 0.42 # DICLAIMER: i cheat on the testing constant
+        self.c0 = c0
         self.regrets = []
 
         self.initialize_episode()
@@ -178,7 +178,7 @@ class MBDE:
 
     def eviction_test(self):
         def threshold(s1, s2, d):
-            return self.c0 * math.log(8**self.m) * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
+            return self.c0 * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
 
         def eviction_criteria(B1, B2, d):
         
@@ -265,7 +265,7 @@ class MBDE:
 
 class BinningUCB:
 
-    def __init__(self, T, c=1.0):
+    def __init__(self, T, c=1/4):
         self.K = int(np.power(T / np.log(T), 1/3))  # Optimal bin count for 1-Lipschitz
         print('K optimal = ', self.K)
         self.bins = np.linspace(0, 1, self.K + 1)
@@ -304,7 +304,7 @@ class BinningUCB:
 
 
 class BinningUCB_Oracle:
-    def __init__(self, T, nb_shifts, c=1.0):
+    def __init__(self, T, nb_shifts, c=1/4):
         """
         T: total time horizon
         change_points: list of change points (rounds where new stationary phases start)
@@ -316,8 +316,6 @@ class BinningUCB_Oracle:
 
         self.nb_shifts = nb_shifts 
         self.get_change_points()
-
-        print('change points = ', self.change_points)
 
         self.phase_end = self.change_points[0]
 
@@ -341,7 +339,6 @@ class BinningUCB_Oracle:
         self.counts = np.zeros(self.K)
         self.values = np.zeros(self.K)
         self.phase_pulls = 0
-        print(f"[Phase {self.phase_idx}] Init with K = {self.K}")
 
     def get_bin_index(self, x):
         return min(self.K - 1, int(x * self.K))
@@ -350,7 +347,6 @@ class BinningUCB_Oracle:
         """Choose an action using UCB within current phase."""
         # Handle phase change if needed
         if self.total_pulls >= self.phase_end:
-            print('change phase at ', self.total_pulls)
             self.phase_idx += 1
             self.phase_start = self.phase_end
             self.phase_end = self.change_points[self.phase_idx]
