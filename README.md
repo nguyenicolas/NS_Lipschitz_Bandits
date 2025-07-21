@@ -13,6 +13,14 @@ Anonymous repo for the Neurips submission #1681 : Non-stationary Lipschitz Bandi
 
 ## Synthetic Experiments
 
-### Environment
+### Non-stationary Bandit Environment
+
+Below are animations of the mean rewards at different time steps.
+
+![WTA Training](images/sgd_wta.gif)
+*Winner-takes-all training dynamics with stochastic gradient descent (see Fig.1)*
+
+![aMCL Training](images/sgd_amcl.gif)
+*Annealed Multiple Choice Learning training dynamics with stochastic gradient descent (see Fig.1)*
 
 ### Numerical results
