@@ -5,10 +5,10 @@ Anonymous repo for the Neurips submission #1681 : Non-stationary Lipschitz Bandi
 ## Repository Structure
 
 ``` shell
-├── ....ipynb    # Quick start notebook with synthetic data examples
-├── .../   # Code for synthetic and UCI dataset experiments
-├── .../           # Source separation experiment implementation
-└── .../                     # Visualizations and animations
+├── Dyadic.py        # Code for binary tree structure
+├── Policy.py        # Code for bandit policis
+├── Environment.py   # Code for bandit environment
+├── Results/         # Numerical results
 ```
 
 ## Synthetic Experiments
