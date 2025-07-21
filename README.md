@@ -27,13 +27,13 @@ Below are animations illustrating the evolution of the mean reward function over
 
 ### Numerical Results
 
-We evaluate the performance of our algorithm **MBDE** by plotting its **dynamic regret**, along with **95% confidence intervals** averaged over `NB_ITER = 100` independent runs.
+We evaluate the performance of our algorithm `MBDE` by plotting its **dynamic regret**, along with **95% confidence intervals** averaged over `NB_ITER = 100` independent runs.
 
 We compare MBDE against two benchmark baselines:
 
-- **Binning+UCB (Naive)**: Discretizes the arm space into $K(T) = \mathcal{O}(T^{1/3})$ arms and applies the standard UCB algorithm naively across all time steps, without adapting to changes in the reward function.
+- `Binning+UCB (Naive)`: Discretizes the arm space into $K(T) = \mathcal{O}(T^{1/3})$ arms and applies the standard UCB algorithm naively across all time steps, without adapting to changes in the reward function.
 
-- **Binning+UCB (Oracle)**: Assumes knowledge of the true change points $\tau_i$'s. For each stationary phase $[\tau_{i}, \tau_{i+1}[$ (see Definition 2 in our paper), it discretizes the arm space into $K_i = \mathcal{O}(\tau_{i+1} - \tau_i)^{1/3}$ arms and runs a fresh instance of UCB within that phase. All estimates are reset at the end of each phase.
+- `Binning+UCB (Oracle)`: Assumes knowledge of the true change points $\tau_i$'s. For each stationary phase $[\tau_{i}, \tau_{i+1}[$ (see Definition 2 in our paper), it discretizes the arm space into $K_i = \mathcal{O}(\tau_{i+1} - \tau_i)^{1/3}$ arms and runs a fresh instance of UCB within that phase. All estimates are reset at the end of each phase.
 
 The figure below shows how MBDE compares to these benchmarks over time:
 
