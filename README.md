@@ -22,7 +22,7 @@ This transition occurs **10 times** throughout the time horizon. The mean reward
 
 Below are animations illustrating the evolution of the mean reward function over time. Each frame shows the reward as a function of the arm space `x` at a particular time step.
 
-![Mean reward](mean_reward_evolution.gif)
+![Mean reward](results/mean_reward_evolution.gif)
 
 
 ### Numerical Results
@@ -37,4 +37,5 @@ We compare MBDE against two benchmark baselines:
 
 The figure below shows how MBDE compares to these benchmarks over time:
 
-![Results](regret_plot.png)
+![Comparison](results/regret_plot.png)
+
