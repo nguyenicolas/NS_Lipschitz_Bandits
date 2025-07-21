@@ -12,8 +12,7 @@ Anonymous repo for the Neurips submission #1681 : Non-stationary Lipschitz Bandi
 ```
 
 ## Synthetic Experiments
-``` shell
-```
+
 ### Environment
 
 ### Numerical results
