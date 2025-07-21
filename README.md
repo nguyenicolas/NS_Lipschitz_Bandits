@@ -14,7 +14,7 @@ Anonymous repo for the Neurips submission `#1681 : Non-stationary Lipschitz Band
 ## Synthetic Experiments
 
 ### Bandit Environment
-We simulate a non-stationary bandit environment over a time horizon of `T = 100,000`, where the mean reward function evolves over time. We consider *Bernoulli bandits*.
+We simulate a non-stationary bandit environment over a time horizon of `T = 100,000`, where the mean reward function evolves over time. We consider **Bernoulli bandits**: the noisy rewards are always bounded in $[0, 1]$.
 In particular, we have $L_T=\mathcal{O}(T)$ and $V_T = \mathcal{O}(T)$. The environment uses a mean reward that cyclically shift between two distinct optima:
 - **Peak at `x₁ = 0.3`**.
 - **Peak at `x₂ = 0.7`**.
