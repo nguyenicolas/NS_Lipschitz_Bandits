@@ -37,5 +37,5 @@ We compare MBDE against two benchmark baselines:
 
 The figure below shows how MBDE compares to these benchmarks over time:
 
-![Comparison](results/regret_plot.png)
+![Comparison](results/regret_plot.jpg)
 
