@@ -25,8 +25,18 @@ Below are animations illustrating the evolution of the mean reward function over
 ![Mean reward](mean_reward_evolution.gif)
 
 
-### Numerical results
-We plot the dynamic regret of our algorithm 'MBDE', with the standard confidence intervals averaged over 'NB_ITER=100' iterations.
-We consider 2 benchmarks:
-- 'Binning+UCB (Naive)': discretizes the space into $K(T)=\mathcal{O}(T^{1/3})$ actions, then run UCB naively over these $K(T)$ arms.
-- 'Binning+UCB (Oracle)': knows when the shift occurs. For each significant pahse $[\tau_i, \tau_{i+1}[$ (see definition 2 of our submission pdf), it discretizes the space into $K_i=\mathcal{O}((\tau_{i+1}-\tau_i)^{1/3})$ arms and run UCB with these $K_i$ arms on each phase. At the end of each phase, it discards all estimates.
+### Numerical Results
+
+We evaluate the performance of our algorithm **MBDE** by plotting its **dynamic regret**, along with **95% confidence intervals** averaged over `NB_ITER = 100` independent runs.
+
+We compare MBDE against two benchmark baselines:
+
+- **Binning+UCB (Naive)**:  
+  This approach discretizes the action space into \( K(T) = \mathcal{O}(T^{1/3}) \) arms and applies the standard UCB algorithm naively across all time steps, without adapting to changes in the reward function.
+
+- **Binning+UCB (Oracle)**:  
+  This method assumes knowledge of the true change points \( \{\tau_i\} \). For each stationary phase \( [\tau_i, \tau_{i+1}) \) (see Definition 2 in our paper), it discretizes the action space into \( K_i = \mathcal{O}((\tau_{i+1} - \tau_i)^{1/3}) \) arms and runs a fresh instance of UCB within that phase. All estimates are reset at the end of each phase.
+
+The figure below shows how MBDE compares to these benchmarks over time:
+
+![Results](regret_plot.pdf)
