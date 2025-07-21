@@ -18,9 +18,9 @@ We simulate a non-stationary bandit environment over a time horizon of `T = 100,
 - **Peak at `x₁ = 0.3`**
 - **Peak at `x₂ = 0.7`**
   
-This transition occurs **10 times** throughout the time horizon. The mean reward function at each time step is **1-Lipschitz** with respect to the action space `x ∈ [0, 1]`
+This transition occurs **10 times** throughout the time horizon. The mean reward function at each time step is **1-Lipschitz** with respect to the arm space `x ∈ [0, 1]`
 
-Below are animations illustrating the evolution of the mean reward function over time. Each frame shows the reward as a function of the action space `x` at a particular time step.
+Below are animations illustrating the evolution of the mean reward function over time. Each frame shows the reward as a function of the arm space `x` at a particular time step.
 
 ![Mean reward](mean_reward_evolution.gif)
 
@@ -31,12 +31,10 @@ We evaluate the performance of our algorithm **MBDE** by plotting its **dynamic 
 
 We compare MBDE against two benchmark baselines:
 
-- **Binning+UCB (Naive)**:  
-  This approach discretizes the action space into \( K(T) = \mathcal{O}(T^{1/3}) \) arms and applies the standard UCB algorithm naively across all time steps, without adapting to changes in the reward function.
+- **Binning+UCB (Naive)**: Discretizes the arm space into $K(T) = \mathcal{O}(T^{1/3})$ arms and applies the standard UCB algorithm naively across all time steps, without adapting to changes in the reward function.
 
-- **Binning+UCB (Oracle)**:  
-  This method assumes knowledge of the true change points \( \{\tau_i\} \). For each stationary phase \( [\tau_i, \tau_{i+1}) \) (see Definition 2 in our paper), it discretizes the action space into \( K_i = \mathcal{O}((\tau_{i+1} - \tau_i)^{1/3}) \) arms and runs a fresh instance of UCB within that phase. All estimates are reset at the end of each phase.
+- **Binning+UCB (Oracle)**: Assumes knowledge of the true change points $\\tau_i\}$. For each stationary phase $[\tau_i, \tau_{i+1}[$ (see Definition 2 in our paper), it discretizes the arm space into $K_i = \mathcal{O}((\tau_{i+1} - \tau_i)^{1/3})$ arms and runs a fresh instance of UCB within that phase. All estimates are reset at the end of each phase.
 
 The figure below shows how MBDE compares to these benchmarks over time:
 
-![Results](regret_plot.pdf)
+![Results](regret_plot.png)
