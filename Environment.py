@@ -8,7 +8,7 @@ class Environment:
         self.dyna_regret = []
 
         if centers is None:
-            self.centers = [0.2, 0.8, 0.2, 0.8]
+            self.centers = [0.2, 0.8, 0.2, 0.8, 0.2]
             #self.centers = self._generate_alternating_centers(nb_shifts)
             print( "CENTERSSSS = ", self.centers)
             
@@ -38,7 +38,7 @@ class Environment:
         phase = min(t // self.phase_length, self.nb_shifts - 1)
         center = self.centers[phase]  # You can add + self.shifts[t] if needed
 
-        width = 0.1
+        width = 0.2
         height = 0.5
 
         distance = abs(x - center)

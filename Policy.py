@@ -125,10 +125,14 @@ class MBDE:
         if starting_depths:
             #self.t_start_replay = self.t
 
+
             d_starting = next(iter(starting_depths)) # the depth that starts
             #print(f'Depth {d_starting} activated at t={self.t}')
             self.tree.activate_depth(d_starting)
-            self.tree.activate_depth(self.m)
+            #for depth in self.tree.active_depths :
+            #    self.tree.activate_depth(depth)
+                
+            #self.tree.activate_depth(self.m)
 
             self.StoreActive[d_starting] = {
             'starting': self.t, 
@@ -265,7 +269,7 @@ class MBDE:
 
 class BinningUCB:
 
-    def __init__(self, T, c=1/3):
+    def __init__(self, T, c=1/6):
         self.K = int(np.power(T / np.log(T), 1/3))  # Optimal bin count for 1-Lipschitz
         print('K optimal = ', self.K)
         self.bins = np.linspace(0, 1, self.K + 1)
@@ -305,7 +309,7 @@ class BinningUCB:
 
 
 class BinningUCB_Oracle:
-    def __init__(self, T, nb_shifts, c=1/3):
+    def __init__(self, T, nb_shifts, c=1/6):
         """
         T: total time horizon
         change_points: list of change points (rounds where new stationary phases start)
