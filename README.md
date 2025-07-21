@@ -19,7 +19,7 @@ In particular, we have $L_T=\mathcal{O}(T)$ and $V_T = \mathcal{O}(T)$. The envi
 - **Peak at `x₁ = 0.3`**.
 - **Peak at `x₂ = 0.7`**.
   
-This transition occurs $\tilde{}L_T = 0 times$ throughout the time horizon. The mean reward function at each time step is **1-Lipschitz** with respect to the arm space `x ∈ [0, 1]`.
+This transition occurs $\tilde{L}_T = 0 times$ throughout the time horizon. The mean reward function at each time step is **1-Lipschitz** with respect to the arm space `x ∈ [0, 1]`.
 
 Below are animations illustrating the evolution of the mean reward function over time. Each frame shows the reward as a function of the arm space `x` at a particular time step.
 
