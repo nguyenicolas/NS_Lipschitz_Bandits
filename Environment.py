@@ -48,7 +48,3 @@ class Environment:
     def get_reward(self, t, x):
         mu_t = self.mean_reward()(t, x)
         return int(np.random.rand() < mu_t)
-
-    def cumulative_dyna_regret(self, t, x_t, best_value_t=0.8):
-        regret_t = best_value_t - self.mean_reward(t, x_t)
-        self.dyna_regret.append(regret_t)
