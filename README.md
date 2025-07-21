@@ -17,10 +17,8 @@ Anonymous repo for the Neurips submission #1681 : Non-stationary Lipschitz Bandi
 
 Below are animations of the mean rewards at different time steps.
 
-![WTA Training](images/sgd_wta.gif)
-*Winner-takes-all training dynamics with stochastic gradient descent (see Fig.1)*
+![Mean reward](mean_reward_evolution.gif)
+*Mean reward function over time*
 
-![aMCL Training](images/sgd_amcl.gif)
-*Annealed Multiple Choice Learning training dynamics with stochastic gradient descent (see Fig.1)*
 
 ### Numerical results
