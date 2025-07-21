@@ -5,10 +5,10 @@ Anonymous repo for the Neurips submission `#1681 : Non-stationary Lipschitz Band
 ## Repository Structure
 
 ``` shell
-├── Dyadic.py        # Code for binary tree structure
-├── Policy.py        # Code for bandit policis
-├── Environment.py   # Code for bandit environment
-├── Results/         # Numerical results
+├── Dyadic.py        # Code for binary tree structure (dyadic trees of bins).
+├── Policy.py        # Code for bandit policies (our algo + benchmark).
+├── Environment.py   # Code for bandit environment (mean values functions).
+├── Results/         # Numerical results.
 ```
 
 ## Synthetic Experiments
