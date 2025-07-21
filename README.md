@@ -4,5 +4,7 @@ Anonymous repo for the Neurips submission #1681 : Non-stationary Lipschitz Bandi
 
 ## Bandit Environment
 
+## Numerical results
+
 ## Code structure
 
