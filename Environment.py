@@ -8,17 +8,21 @@ class Environment:
         self.dyna_regret = []
 
         if centers is None:
-            self.centers = self._generate_alternating_centers(nb_shifts)
+            self.centers = [0.2, 0.8, 0.2, 0.8, 0.2, 0.8,0.2, 0.8,0.2, 0.8]
+            #self.centers = self._generate_alternating_centers(nb_shifts)
+            print( "CENTERSSSS = ", self.centers)
+            
         else:
             assert len(centers) == nb_shifts, "Length of centers must match nb_shifts"
-            self.centers = centers
+            
+            
 
         # Optional small perturbation (adversarial or stochastic shift noise)
         self.shifts = np.random.normal(0, shift_noise_std, size=T)
 
     def _generate_alternating_centers(self, nb_shifts):
         """Generate well-separated centers in an alternating pattern."""
-        base_centers = np.linspace(0.1, 0.9, nb_shifts)
+        base_centers = [0.2, 0.2, 0.8, 0.8] #np.linspace(0.2, 0.8, nb_shifts)
         reordered = []
         left = 0
         right = nb_shifts - 1
@@ -35,13 +39,13 @@ class Environment:
         center = self.centers[phase]  # You can add + self.shifts[t] if needed
 
         width = 0.1
-        height = 0.5
+        height = 0.7
 
         distance = abs(x - center)
         if distance < width:
-            return 0.5 + height * (1 - distance / width)
+            return 0.3 + height * (1 - distance / width)
         else:
-            return 0.5
+            return 0.3
 
     def get_reward(self, t, x):
         mu_t = self.mean_reward(t, x)

@@ -178,7 +178,7 @@ class MBDE:
 
     def eviction_test(self):
         def threshold(s1, s2, d):
-            return self.c0 * math.sqrt((s2 - s1) * (2 ** d)) + (4 * (s2 - s1) / 2 ** d)
+            return self.c0 * math.log(self.T)* math.sqrt(max((s2 - s1) * (2 ** d), 4**d)) + (4 * (s2 - s1) / 2 ** d)
 
         def eviction_criteria(B1, B2, d):
         
