@@ -8,7 +8,7 @@ class Environment:
         self.dyna_regret = []
 
         if centers is None:
-            self.centers = [0.2, 0.8, 0.2, 0.8, 0.2, 0.8,0.2, 0.8,0.2, 0.8]
+            self.centers = [0.2, 0.8, 0.2, 0.8]
             #self.centers = self._generate_alternating_centers(nb_shifts)
             print( "CENTERSSSS = ", self.centers)
             
@@ -39,13 +39,13 @@ class Environment:
         center = self.centers[phase]  # You can add + self.shifts[t] if needed
 
         width = 0.1
-        height = 0.7
+        height = 0.5
 
         distance = abs(x - center)
         if distance < width:
-            return 0.3 + height * (1 - distance / width)
+            return 0.5 + height * (1 - distance / width)
         else:
-            return 0.3
+            return 0.5
 
     def get_reward(self, t, x):
         mu_t = self.mean_reward(t, x)

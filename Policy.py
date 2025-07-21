@@ -265,7 +265,7 @@ class MBDE:
 
 class BinningUCB:
 
-    def __init__(self, T, c=1/4):
+    def __init__(self, T, c=1/3):
         self.K = int(np.power(T / np.log(T), 1/3))  # Optimal bin count for 1-Lipschitz
         print('K optimal = ', self.K)
         self.bins = np.linspace(0, 1, self.K + 1)
@@ -274,6 +274,7 @@ class BinningUCB:
         self.total_pulls = 0
         self.c = c
         self.regrets = []
+        self.T = T
 
 
     def get_bin_index(self, x):
@@ -288,7 +289,7 @@ class BinningUCB:
         if self.total_pulls < self.K: # choose each bin at least one
             self.bin_index = self.total_pulls
         else:
-            ucb_values = self.values + self.c * np.sqrt(np.log(self.total_pulls) / (self.counts + 1e-9))
+            ucb_values = self.values + self.c * np.sqrt(np.log(self.T) / (self.counts + 1e-9))
             self.bin_index = int(np.argmax(ucb_values))
 
         self.total_pulls += 1
@@ -304,7 +305,7 @@ class BinningUCB:
 
 
 class BinningUCB_Oracle:
-    def __init__(self, T, nb_shifts, c=1/4):
+    def __init__(self, T, nb_shifts, c=1/3):
         """
         T: total time horizon
         change_points: list of change points (rounds where new stationary phases start)
@@ -323,6 +324,7 @@ class BinningUCB_Oracle:
         self.total_pulls = 0
         self._init_phase()
         self.regrets = []
+        self.T = T
 
     def get_change_points(self):
         if self.nb_shifts < 2:
@@ -355,7 +357,7 @@ class BinningUCB_Oracle:
         if self.phase_pulls < self.K:
             self.bin_index = self.phase_pulls
         else:
-            bonuses = self.c * np.sqrt(np.log(max(self.phase_pulls, 1)) / (self.counts + 1e-9))
+            bonuses = self.c * np.sqrt(np.log(self.T) / (self.counts + 1e-9))
             self.bin_index = int(np.argmax(self.values + bonuses))
 
         self.total_pulls += 1
