@@ -29,7 +29,7 @@ Below are animations illustrating the evolution of the mean reward function over
 
 We evaluate the performance of our algorithm `MBDE` by plotting its dynamic regret, and we report the standard 95% confidence intervals averaged over `NB_ITER = 100` independent runs.
 
-We compare MBDE against two benchmark baselines:
+Since there is no existing algorithm designed for non-stationary Lipschitz bandits, we compare MBDE against these two benchmark baselines:
 
 - `Binning+UCB (Naive)`: Discretizes the arm space into $K(T) = \mathcal{O}(T^{1/3})$ arms and applies the standard UCB algorithm naively across all time steps, without adapting to changes in the reward function.
 
