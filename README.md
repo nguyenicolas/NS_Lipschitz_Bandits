@@ -27,7 +27,7 @@ Below are animations illustrating the evolution of the mean reward function over
 
 ### Numerical Results
 
-We evaluate the performance of our algorithm `MBDE` by plotting its **dynamic regret**, along with **95% confidence intervals** averaged over `NB_ITER = 100` independent runs.
+We evaluate the performance of our algorithm `MBDE` by plotting its dynamic regret, and we report the standard 95% confidence intervals averaged over `NB_ITER = 100` independent runs.
 
 We compare MBDE against two benchmark baselines:
 
