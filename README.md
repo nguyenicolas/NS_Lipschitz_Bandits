@@ -1,6 +1,6 @@
 # Code for Non-Stationary Lipschitz Bandits
 
-Anonymous repo for the Neurips submission `#1681 : Non-stationary Lipschitz Bandits`.
+Repo for the paper [Non-Stationary Lipschitz Bandits](https://arxiv.org/abs/2505.18871).
 
 ## Repository Structure
 
